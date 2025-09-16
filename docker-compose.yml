@@ -4,18 +4,19 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: effectivemobile_php_app
-    container_name: effectivemobile_app
+    image: emob_php_app
+    container_name: emob_app
     restart: unless-stopped
     working_dir: /var/www/effectivemobile
     volumes:
       - .:/var/www/effectivemobile:cached
+      - ./php-development.ini:/usr/local/etc/php/conf.d/custom.ini
     networks:
-      - effectivemobile_network
+      - emob_network
 
   webserver:
     image: nginx:alpine
-    container_name: effectivemobile_webserver
+    container_name: emob_webserver
     restart: unless-stopped
     ports:
       - "80:80"
@@ -26,40 +27,39 @@ services:
     depends_on:
       - app
     networks:
-      - effectivemobile_network
+      - emob_network
 
   db:
-    image: mysql:latest
-    container_name: effectivemobile_db
+    image: mysql:latest  # или mysql:8.4
+    container_name: emob_db
     restart: unless-stopped
     environment:
-      MYSQL_ROOT_PASSWORD: Khm-w4g-Wu5-F4B
-      MYSQL_DATABASE: em
-      MYSQL_USER: malferov
-      MYSQL_PASSWORD: 123456
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_USER: ${DB_USERNAME}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
     volumes:
       - db_data:/var/lib/mysql
     networks:
-      - effectivemobile_network
+      - emob_network
 
   phpmyadmin:
-    image: phpmyadmin:latest
-    container_name: effectivemobile_pma
+    image: phpmyadmin:5.2
+    container_name: emob_pma
     restart: unless-stopped
     ports:
       - "8080:80"
     environment:
-      PMA_HOST: db
-      PMA_USER: malferov
-      PMA_PASSWORD: 123456
-      MYSQL_ROOT_PASSWORD: Khm-w4g-Wu5-F4B
+      PMA_HOST: ${PMA_HOST}
+      PMA_USER: ${PMA_USER}
+      PMA_PASSWORD: ${PMA_PASSWORD}
     depends_on:
       - db
     networks:
-      - effectivemobile_network
+      - emob_network
 
 networks:
-  effectivemobile_network:
+  emob_network:
     driver: bridge
 
 volumes:
